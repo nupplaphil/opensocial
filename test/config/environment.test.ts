@@ -38,8 +38,8 @@ describe('EnvironmentConfig', () => {
     chai.expect(config.get('envFilePath')).to.equal(expected);
   });
 
-  it('returns "node-hapi-typescript-template" if process.env.APP_NAME is not set', () => {
-    const expected = 'node-hapi-typescript-template';
+  it('returns "opensocial" if process.env.APP_NAME is not set', () => {
+    const expected = 'opensocial';
 
     chai.expect(config.get('name')).to.equal(expected);
   });
