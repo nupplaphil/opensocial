@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:10.15
+      - image: circleci/node:13.12
     steps:
       - checkout
       - restore_cache:
@@ -24,7 +24,7 @@ jobs:
             - dist
   unit-test:
     docker:
-      - image: circleci/node:10.15
+      - image: circleci/node:13.12
     steps:
       - checkout
       - attach_workspace:
@@ -38,7 +38,7 @@ jobs:
           path: ./artifacts
   lint-test:
     docker:
-      - image: circleci/node:10.15
+      - image: circleci/node:13.12
     steps:
       - checkout
       - attach_workspace:
@@ -64,7 +64,7 @@ jobs:
           path: ./artifacts
   release:
     docker:
-      - image: circleci/node:10.15
+      - image: circleci/node:13.12
     steps:
       - setup_remote_docker
       - checkout
