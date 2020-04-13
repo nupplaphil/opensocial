@@ -1,0 +1,14 @@
+node_modules
+dist
+doc
+.vagrant
+.idea
+npm-debug.log
+env.json
+test-results.xml
+lint-test-results.xml
+artifacts
+.nyc_output
+*.sqlite
+*.sqlite3
+knexfile.ts

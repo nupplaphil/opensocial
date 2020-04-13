@@ -1,0 +1,71 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "dist",
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@config": [
+        "config"
+      ],
+      "@config/*": [
+        "config/*"
+      ],
+      "@lib": [
+        "lib"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ],
+      "@model": [
+        "model"
+      ],
+      "@model/*": [
+        "model/*"
+      ],
+      "@repository": [
+        "repository"
+      ],
+      "@repository/*": [
+        "repository/*"
+      ],
+      "@route": [
+        "route"
+      ],
+      "@route/*": [
+        "route/*"
+      ],
+      "@service": [
+        "service"
+      ],
+      "@service/*": [
+        "service/*"
+      ],
+      "@util/*": [
+        "util/*"
+      ],
+      "@db": [
+        "db"
+      ],
+      "@db/*": [
+        "db/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "test/**/*.test.ts"
+  ]
+}

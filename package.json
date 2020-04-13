@@ -1,0 +1,141 @@
+{
+  "name": "opensocial",
+  "version": "0.0.1",
+  "description": "OpenSocial Fediverse backend API",
+  "main": "dist/main.bundle.js",
+  "sideEffects": false,
+  "scripts": {
+    "build": "node_modules/.bin/webpack-cli",
+    "build:watch": "node_modules/.bin/webpack-cli --watch --build-delimiter='Webpack: finished building'",
+    "dev": "node_modules/.bin/npm run build && npm start",
+    "dev:watch": "node_modules/.bin/nodemon -e ts -w src -x npm run dev",
+    "dev:debug": "node_modules/.bin/npm run build && npm run debug",
+    "test": "export NODE_ENV=unit_test && node_modules/.bin/nyc node_modules/.bin/mocha-webpack",
+    "test:coverage": "node_modules/.bin/nyc check-coverage",
+    "test:watch": "node_modules/.bin/npm run test -- --watch",
+    "test:junit": "node_modules/.bin/npm run test -- --reporter mocha-junit-reporter --reporter-options mochaFile=./artifacts/junit/mocha/unit-test-results.xml",
+    "test:security": "node_modules/.bin/npm audit --json || true",
+    "test:lint": "node_modules/.bin/npm run lint",
+    "test:all": "node_modules/.bin/npm run test && npm run lint && npm run test:security",
+    "lint": "node_modules/.bin/eslint ./ --ext .ts,.tsx",
+    "lint:fix": "npm run lint -- --fix",
+    "debug": "node_modules/.bin/nodemon --watch dist --inspect-brk=0.0.0.0:9222 --nolazy ./dist/main.bundle.js",
+    "doc": "node_modules/.bin/typedoc --out docs src",
+    "release": "node_modules/.bin/semantic-release",
+    "release:dry-run": "node_modules/.bin/npm run release -- --dry-run --no-ci",
+    "commitmsg": "node_modules/.bin/commitlint -e $GIT_PARAMS",
+    "start": "node dist/main.bundle.js",
+    "knex:migrate:make": "node_modules/.bin/knex --knexfile knexfile.ts -x ts migrate:make",
+    "knex:migrate:latest": "node_modules/.bin/knex --knexfile knexfile.ts migrate:latest",
+    "knex:migrate:rollback": "node_modules/.bin/knex --knexfile knexfile.ts migrate:rollback",
+    "knex:seed:run": "node_modules/.bin/knex --knexfile knexfile.ts seed:run"
+  },
+  "directories": {
+    "src": "./src",
+    "test": "./test",
+    "dist": "./dist",
+    "doc": "./doc"
+  },
+  "release": {
+    "branch": "master",
+    "tagFormat": "${version}",
+    "npmPublish": false,
+    "verifyConditions": [
+      "@semantic-release/git"
+    ],
+    "prepare": [
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      {
+        "path": "@semantic-release/git",
+        "assets": [
+          "package.json",
+          "package-lock.json",
+          "CHANGELOG.md"
+        ],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    "publish": [
+      "@semantic-release/github"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nupplaphil/opensocial"
+  },
+  "keywords": [
+    "fediverse",
+    "opensocial",
+    "node",
+    "typescript",
+    "api"
+  ],
+  "author": "Philipp Holzer <admin@philipp.info>",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "7.0.1",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/exec": "^5.0.0",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/github": "^7.0.5",
+    "@semantic-release/npm": "^7.0.5",
+    "@types/boom": "7.2.1",
+    "@types/bunyan": "1.8.5",
+    "@types/chai": "4.1.7",
+    "@types/chai-as-promised": "7.1.0",
+    "@types/convict": "4.2.1",
+    "@types/hapi__hapi": "^19.0.2",
+    "@types/hapi__inert": "^5.2.0",
+    "@types/hapi__joi": "^16.0.12",
+    "@types/hapi__vision": "^5.5.1",
+    "@types/mocha": "5.2.5",
+    "@types/node": "13.11.1",
+    "@types/sinon": "7.0.3",
+    "@typescript-eslint/eslint-plugin": "^2.27.0",
+    "@typescript-eslint/parser": "^2.27.0",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-loader": "^4.0.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "0.14.3",
+    "istanbul-instrumenter-loader": "3.0.1",
+    "mocha": "5.2.0",
+    "mocha-junit-reporter": "1.17.0",
+    "mocha-webpack": "2.0.0-beta.0",
+    "nodemon": "1.18.9",
+    "nyc": "^15.0.1",
+    "prettier": "^2.0.4",
+    "semantic-release": "^17.0.4",
+    "sinon": "7.2.2",
+    "sqlite3": "4.1.1",
+    "ts-loader": "5.3.2",
+    "ts-sinon": "^1.0.25",
+    "tsconfig-paths-webpack-plugin": "3.2.0",
+    "typedoc": "0.17.4",
+    "typescript": "^3.8.3",
+    "webpack": "4.28.3",
+    "webpack-cli": "3.1.2",
+    "webpack-node-externals": "1.7.2"
+  },
+  "dependencies": {
+    "@hapi/boom": "^9.1.0",
+    "@hapi/hapi": "^19.1.1",
+    "@hapi/inert": "^6.0.1",
+    "@hapi/joi": "^17.1.1",
+    "@hapi/vision": "^6.0.0",
+    "axios": "^0.19.2",
+    "convict": "4.4.1",
+    "deepmerge": "3.0.0",
+    "hapi-swagger": "^13.0.0",
+    "knex": "^0.20.13",
+    "knex-stringcase": "1.4.1",
+    "winston": "^3.2.1",
+    "winston-format-debug": "^1.0.3"
+  }
+}
