@@ -13,59 +13,56 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
+      "@core" : [
+        "core"
+      ],
+      "@core/*" : [
+        "core/*"
+      ],
+      "@modules": [
+        "modules"
+      ],
+      "@modules/*": [
+        "modules/*"
+      ],
       "@config": [
         "config"
       ],
       "@config/*": [
         "config/*"
       ],
-      "@lib": [
-        "lib"
-      ],
-      "@lib/*": [
-        "lib/*"
-      ],
-      "@model": [
-        "model"
-      ],
-      "@model/*": [
-        "model/*"
-      ],
-      "@repository": [
-        "repository"
-      ],
-      "@repository/*": [
-        "repository/*"
-      ],
-      "@route": [
-        "route"
-      ],
-      "@route/*": [
-        "route/*"
-      ],
-      "@service": [
-        "service"
-      ],
-      "@service/*": [
-        "service/*"
+      "@util": [
+        "util"
       ],
       "@util/*": [
         "util/*"
       ],
+      "@infra": [
+        "infra"
+      ],
+      "@infra/*": [
+        "infra/*"
+      ],
       "@db": [
-        "db"
+        "infra/knex"
       ],
       "@db/*": [
-        "db/*"
+        "infra/knex/*"
+      ],
+      "@http": [
+        "infra/hapi"
+      ],
+      "@http/*": [
+        "infra/hapi/*"
       ]
     }
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/**/*.test.ts"
   ],
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx",
-    "test/**/*.test.ts"
+    "src/**/*.tsx"
   ]
 }

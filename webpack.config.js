@@ -6,7 +6,7 @@ const mode = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === '
 const isProd = mode === 'production';
 
 module.exports = {
-  entry: './src/App.ts',
+  entry: './src/index.ts',
   devtool: isProd ? 'source-map' : 'cheap-module-eval-source-map',
   mode: mode,
   target: 'node',
