@@ -1,7 +1,6 @@
 import Axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios';
-import { logger } from '@util/Logger';
-import { ExtendedError } from '@util/ExtendedError';
-import Rethrow from '@util/Rethrow';
+import { logger } from '@util';
+import { ExtendedError, Rethrow } from '@core/util';
 import BaseGateway from './BaseGateway';
 
 export abstract class HttpGateway extends BaseGateway {

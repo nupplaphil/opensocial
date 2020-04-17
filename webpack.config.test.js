@@ -27,15 +27,13 @@ module.exports = {
         test: /\.ts$/,
         include: [
           path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, 'test')
         ],
         loader: 'istanbul-instrumenter-loader'
       } : [],
       {
         test: /\.ts$/,
         include: [
-          path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, 'test')
+          path.resolve(__dirname, 'src')
         ],
         loader: 'ts-loader'
       }
