@@ -1,10 +1,9 @@
-import { ServerRoute } from "@hapi/hapi";
+import { Server } from "@hapi/hapi";
 
-import { readiness, liveness } from "@modules/monitor/infra/hapi/routes";
+import * as monitor from "@modules/monitor/infra/hapi/routes";
 
-const routes: ServerRoute[] = [
-  readiness,
-  liveness,
-];
+const routes = function (server: Server) {
+  server.route(monitor.routes);
+}
 
 export default routes;

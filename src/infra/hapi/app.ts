@@ -39,7 +39,7 @@ async function main(): Promise<void> {
   }
 
   try {
-    server.route(routes);
+    routes(server);
   } catch (e) {
     throw new Rethrow('Problem creating routes', e);
   }
