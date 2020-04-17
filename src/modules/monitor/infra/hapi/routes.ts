@@ -1,6 +1,6 @@
 import { ServerRoute } from '@hapi/hapi';
 import * as handler from "./handler";
-import { monitorResponse } from './joi/Monitor';
+import * as joiModel from './model';
 
 export const liveness: ServerRoute = {
   method: 'GET',
@@ -10,7 +10,7 @@ export const liveness: ServerRoute = {
     description: 'Tests the application\'s "liveness"',
     tags: ['api'],
     response: {
-      schema: monitorResponse,
+      schema: joiModel.monitorResponse,
     },
   },
 };
@@ -23,7 +23,7 @@ export const readiness: ServerRoute = {
     description: 'Tests the application\'s "readiness"',
     tags: ['api'],
     response: {
-      schema: monitorResponse,
+      schema: joiModel.monitorResponse,
     },
   },
 };

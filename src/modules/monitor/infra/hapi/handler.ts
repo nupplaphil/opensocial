@@ -1,5 +1,5 @@
-import { getLivenessController } from '../../../useCases/getLiveness';
-import { getReadinessController } from '../../../useCases/getReadiness';
+import { getLivenessController } from '../../useCases/getLiveness';
+import { getReadinessController } from '../../useCases/getReadiness';
 import {Request, ResponseObject, ResponseToolkit} from "@hapi/hapi";
 
 export const liveness = async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {

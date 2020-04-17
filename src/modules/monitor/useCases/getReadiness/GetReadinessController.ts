@@ -1,9 +1,9 @@
 import { BaseController } from '@core/infra';
-import { ReadinessDTO } from './GetReadinessDTO';
+import { MonitorDTO } from '../../dto/MonitorDTO';
 
 export class GetReadinessController extends BaseController  {
   protected async executeImpl(): Promise<any> {
-    const status: ReadinessDTO = {
+    const status: MonitorDTO = {
       status: true
     };
 
