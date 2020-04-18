@@ -62,6 +62,15 @@ jobs:
             npm run test:security | tee artifacts/json/security/security-test-results.json
       - store_artifacts:
           path: ./artifacts
+  codecov:
+    docker:
+      - image: circleci/
+    steps:
+      - attach_workspace:
+          at: .
+      - codecov/upload:
+          file: {{ artifacts/istanbul }}
+          flags: 'unittests'
   release:
     docker:
       - image: circleci/node:13.12
@@ -74,7 +83,9 @@ jobs:
           command: npm run release
 
 workflows:
-  version: 2
+  version: 2.1
+  orbs:
+    codecov: codecov/codecov@1.0.2
   build-test-release:
     jobs:
       - build
@@ -87,6 +98,9 @@ workflows:
       - security-test:
           requires:
             - build
+      - codecov:
+          requires:
+            - unit-test
       - release:
           requires:
             - unit-test
