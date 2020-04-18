@@ -10,15 +10,17 @@
     "src/*.ts"
   ],
   "exclude": [
-    "**/*.d.ts"
+    "**/*.d.ts",
+    "src/**/*.test.ts"
   ],
   "reporter": [
     "text-summary",
-    "json-summary"
+    "json-summary",
+    "text-lcov"
   ],
   "cache": true,
   "all": true,
   "instrument": false,
   "sourceMap": false,
-  "report-dir": "./artifacts/json/istanbul"
+  "report-dir": "./artifacts/istanbul"
 }

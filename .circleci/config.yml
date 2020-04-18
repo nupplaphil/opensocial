@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.2
+
 jobs:
   build:
     docker:
@@ -36,6 +39,9 @@ jobs:
           path: ./artifacts/junit
       - store_artifacts:
           path: ./artifacts
+      - codecov/upload:
+          file: ./artifacts/istanbul/coverage-summary.json
+          flags: 'unittests'
   lint-test:
     docker:
       - image: circleci/node:13.12
@@ -74,7 +80,7 @@ jobs:
           command: npm run release
 
 workflows:
-  version: 2
+  version: 2.1
   build-test-release:
     jobs:
       - build
