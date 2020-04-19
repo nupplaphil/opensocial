@@ -15,8 +15,7 @@
   ],
   "reporter": [
     "text-summary",
-    "json-summary",
-    "text-lcov"
+    "json"
   ],
   "cache": true,
   "all": true,
