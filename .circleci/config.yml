@@ -40,7 +40,7 @@ jobs:
       - store_artifacts:
           path: ./artifacts
       - codecov/upload:
-          file: ./artifacts/istanbul/coverage-summary.json
+          file: ./artifacts/istanbul/coverage-final.json
           flags: 'unittests'
   lint-test:
     docker:
