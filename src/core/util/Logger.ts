@@ -1,25 +1,16 @@
 export type LoggerContext = {
-  context?: string;
   error?: Error;
   [key: string]: {} | null | undefined;
 }
 
 export type LoggerMetadata = {
-  name: string;
-  logLevel: string;
-  env: string;
+  domain?: string;
+  logLevel?: string;
+  env?: string;
 }
 
 export abstract class Logger {
   protected constructor(protected loggerMetadata: LoggerMetadata, public context?: LoggerContext) {
-  }
-
-  setContext(context: LoggerContext): void {
-    this.context = context;
-  }
-
-  getContext(): LoggerContext | false {
-    return this.context ?? false;
   }
 
   abstract emerg(message: string, context?: LoggerContext): void;

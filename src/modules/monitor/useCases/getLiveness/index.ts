@@ -1,7 +1,6 @@
-import { GetLivenessController } from './GetLivenessController';
-import { logger } from '@util';
+import {GetLivenessController} from './GetLivenessController';
 
-const getLivenessController = new GetLivenessController(logger);
+const getLivenessController = new GetLivenessController();
 
 export {
   getLivenessController

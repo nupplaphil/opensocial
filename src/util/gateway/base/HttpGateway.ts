@@ -1,7 +1,9 @@
 import Axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from 'axios';
-import { logger } from '@util';
-import { ExtendedError, Rethrow } from '@core/util';
+import {createLogger} from '@util';
+import {ExtendedError, Rethrow} from '@core/util';
 import BaseGateway from './BaseGateway';
+
+const LOGGER = createLogger('HTTPGateway');
 
 export abstract class HttpGateway extends BaseGateway {
   private instance: HttpInstance;
@@ -9,7 +11,7 @@ export abstract class HttpGateway extends BaseGateway {
   constructor(httpOpts?: HttpRequestConfig | undefined) {
     super();
     if (httpOpts) {
-      logger.debug('[HttpGateway] Instance Options', { options: httpOpts });
+      LOGGER.debug('[HttpGateway] Instance Options', { options: httpOpts });
       this.instance = Axios.create(httpOpts);
     } else {
       this.instance = Axios.create();
@@ -114,71 +116,71 @@ export abstract class HttpGateway extends BaseGateway {
       config = {};
     }
     if (this.instance.defaults.baseURL) {
-      logger.info(`[HttpGateway] BEGIN ${method.toUpperCase()} ${this.instance.defaults.baseURL}${url}`);
+      LOGGER.info(`[HttpGateway] BEGIN ${method.toUpperCase()} ${this.instance.defaults.baseURL}${url}`);
     } else {
-      logger.info(`[HttpGateway] BEGIN ${method.toUpperCase()} ${url}`);
+      LOGGER.info(`[HttpGateway] BEGIN ${method.toUpperCase()} ${url}`);
     }
 
     if (this.instance.defaults.headers || (config && config.headers)) {
-      logger.info('[HttpGateway] Request Headers:');
-      logger.info(Object.assign(this.instance.defaults.headers
+      LOGGER.info('[HttpGateway] Request Headers:');
+      LOGGER.info(Object.assign(this.instance.defaults.headers
         ? this.instance.defaults.headers : {},
         config.headers ? config.headers : {}));
     }
 
     if (data) {
-      logger.info('[HttpGateway] Request Payload:');
-      logger.info(data);
+      LOGGER.info('[HttpGateway] Request Payload:');
+      LOGGER.info(data);
     }
 
     if (this.instance.defaults.params || (config && config.params)) {
-      logger.info('[HttpGateway] Request Query Parameters:');
-      logger.info(Object.assign(this.instance.defaults.params
+      LOGGER.info('[HttpGateway] Request Query Parameters:');
+      LOGGER.info(Object.assign(this.instance.defaults.params
         ? this.instance.defaults.params : {}, config.params ? config.params : {}));
     }
   }
 
   private static logResponse(response: HttpResponse): void {
-    logger.debug('[HttpGateway] Full Response Object', { response: response });
+    LOGGER.debug('[HttpGateway] Full Response Object', { response: response });
 
     if (response.headers) {
-      logger.info('[HttpGateway] Response Headers', { headers: response.headers });
+      LOGGER.info('[HttpGateway] Response Headers', { headers: response.headers });
     }
 
     if (response.data) {
-      logger.info('[HttpGateway] Response Payload', { payload: response.data });
+      LOGGER.info('[HttpGateway] Response Payload', { payload: response.data });
     }
 
     if (response.status) {
-      logger.info('[HttpGateway] Status Code', { statusCode: response.status });
+      LOGGER.info('[HttpGateway] Status Code', { statusCode: response.status });
     }
 
     if (response.config.method) {
-      logger.info(`[HTTPGateway] END ${response.config.method!.toUpperCase()} ${response.config.url}`);
+      LOGGER.info(`[HTTPGateway] END ${response.config.method!.toUpperCase()} ${response.config.url}`);
     }
   }
 
   private static logError(error: any): void {
-    logger.debug('[HttpGateway] Full Error Object', { error: error });
+    LOGGER.debug('[HttpGateway] Full Error Object', { error: error });
     if (error.response) {
-      logger.alert('[HttpGateway] Endpoint responded with a status code that falls out of the range of 2xx');
-      logger.debug('[HttpGateway] Full Error Response Object', { response: error.response });
+      LOGGER.alert('[HttpGateway] Endpoint responded with a status code that falls out of the range of 2xx');
+      LOGGER.debug('[HttpGateway] Full Error Response Object', { response: error.response });
       if (error.response.status) {
-        logger.alert('[HttpGateway] Error Response Status Code', { statusCode: error.response.statusCode });
+        LOGGER.alert('[HttpGateway] Error Response Status Code', { statusCode: error.response.statusCode });
       }
       if (error.response.headers) {
-        logger.alert('[HttpGateway] Error Response Headers', { headers: error.response.headers });
+        LOGGER.alert('[HttpGateway] Error Response Headers', { headers: error.response.headers });
       }
       if (error.response.data) {
-        logger.alert('[HttpGateway] Error Response Payload', { payload: error.response.data });
+        LOGGER.alert('[HttpGateway] Error Response Payload', { payload: error.response.data });
       }
     } else if (error.request) {
-      logger.alert('[HttpGateway] Something happened in setting up the request that triggered an Error');
-      logger.debug('[HttpGateway] Full Error Request Object', { request: error.request });
+      LOGGER.alert('[HttpGateway] Something happened in setting up the request that triggered an Error');
+      LOGGER.debug('[HttpGateway] Full Error Request Object', { request: error.request });
     } else {
-      logger.alert('[HttpGateway] Generic error occurred');
+      LOGGER.alert('[HttpGateway] Generic error occurred');
     }
-    logger.info('[HttpGateway] Error Config', { config: error.config });
+    LOGGER.info('[HttpGateway] Error Config', { config: error.config });
   }
 }
 

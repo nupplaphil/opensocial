@@ -1,12 +1,12 @@
 import config from '@config/environment';
-import { logger } from '@util';
-import { setSignals, globalRouteOptions, plugins } from '@http/config';
-import { Rethrow } from '@core/util';
-import { hooks } from '@http/hook';
+import {createLogger} from '@util';
+import {globalRouteOptions, plugins, setSignals} from '@http/config';
+import {Rethrow} from '@core/util';
+import {hooks} from '@http/hook';
 import routes from '@http/routes';
-import { Server } from '@hapi/hapi';
+import {Server} from '@hapi/hapi';
 
-logger.setContext({ context: 'boot'});
+const LOGGER = createLogger( 'boot');
 
 let server: Server;
 
@@ -59,9 +59,9 @@ async function main(): Promise<void> {
 
 // Execute main function
 main().then(() => {
-  logger.notice(`Server started at: ${server.info.uri}`);
-  logger.notice(`API docs available at: ${server.info.uri}/documentation`);
+  LOGGER.notice(`Server started at: ${server.info.uri}`);
+  LOGGER.notice(`API docs available at: ${server.info.uri}/documentation`);
 }).catch((e) => {
-  logger.emerg('Fatal error during init', { context: 'shutdown', error: e });
+  LOGGER.emerg('Fatal error during init', { context: 'shutdown', error: e });
   process.exit(1);
 });

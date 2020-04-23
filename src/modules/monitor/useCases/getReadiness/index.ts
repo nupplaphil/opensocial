@@ -1,7 +1,6 @@
-import { GetReadinessController } from './GetReadinessController';
-import { logger } from '@util';
+import {GetReadinessController} from './GetReadinessController';
 
-const getReadinessController = new GetReadinessController(logger);
+const getReadinessController = new GetReadinessController();
 
 export {
   getReadinessController

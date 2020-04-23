@@ -1,16 +1,7 @@
 import convict from 'convict';
-import { existsSync } from 'fs';
+import {existsSync} from 'fs';
 
-const config: convict.Config<{
-  env: string,
-  envFilePath: string,
-  name: string,
-  logLevel: string,
-  enableLogs: true,
-  host: string,
-  port: number,
-  protocol: string
-}> = convict({
+const config = convict({
   env: {
     doc: 'Environment',
     format: String,
@@ -22,12 +13,6 @@ const config: convict.Config<{
     format: String,
     default: 'env.json',
     env: 'ENV_FILE_PATH',
-  },
-  name: {
-    doc: 'Name of application',
-    format: String,
-    default: 'opensocial',
-    env: 'APP_NAME',
   },
   logLevel: {
     doc: 'Winston log level',

@@ -1,4 +1,4 @@
-import { DomainEvent, AggregateRoot, UniqueEntityID } from '@core/domain';
+import {AggregateRoot, DomainEventInterface, UniqueEntityID} from '@core/domain';
 
 export class DomainEvents {
   private static handlersMap: {
@@ -15,7 +15,7 @@ export class DomainEvents {
   }
 
   private static dispatchAggregateEvents(aggregate: AggregateRoot<any>): void {
-    aggregate.domainEvents.forEach((event: DomainEvent) => this.dispatch(event));
+    aggregate.domainEvents.forEach((event: DomainEventInterface) => this.dispatch(event));
   }
 
   private static removeAggregateFomMarkedDispatchList(aggregate: AggregateRoot<any>): void {
@@ -45,7 +45,7 @@ export class DomainEvents {
     }
   }
 
-  static register(callback: (event: DomainEvent) => void, eventClassName: string): void {
+  static register(callback: (event: DomainEventInterface) => void, eventClassName: string): void {
     if (!this.handlersMap.hasOwnProperty(eventClassName)) {
       this.handlersMap[eventClassName] = [];
     }
@@ -60,7 +60,7 @@ export class DomainEvents {
     this.markedAggregates = [];
   }
 
-  private static dispatch(event: DomainEvent): void {
+  private static dispatch(event: DomainEventInterface): void {
     const eventClassName: string = event.constructor.name;
 
     if (this.handlersMap.hasOwnProperty(eventClassName)) {

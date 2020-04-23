@@ -1,7 +1,15 @@
 import config from '@config/environment';
 import * as winston from 'winston';
-import createDebugFormat from 'winston-format-debug';
-import { Logger, LoggerContext, LoggerMetadata } from "@core/util/Logger";
+import {Logger, LoggerContext, LoggerMetadata} from "@core/util/Logger";
+
+const logFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.timestamp(),
+  winston.format.align(),
+  winston.format.printf(
+    info => `${info.timestamp} [${info.domain}] ${info.level}: ${info.message} ${JSON.stringify(info.context)}`,
+  ),
+);
 
 /// @todo Add Tests
 export class WinstonLogger extends Logger {
@@ -17,15 +25,9 @@ export class WinstonLogger extends Logger {
         level: loggerMetadata.logLevel,
         levels: winston.config.syslog.levels,
         defaultMeta: loggerMetadata,
+        format: logFormat,
         transports: [
-          new winston.transports.Console({
-            format: winston.format.combine(
-              createDebugFormat({
-                levels: winston.config.syslog.levels,
-                colors: winston.config.syslog.colors
-              })
-            )
-          })
+          new winston.transports.Console()
           ]
       };
     } else {
@@ -120,4 +122,3 @@ export class WinstonLogger extends Logger {
     }
   }
 }
-

@@ -1,6 +1,6 @@
-import { Request, ResponseToolkit, ResponseObject } from '@hapi/hapi';
-import { Boom, boomify } from "@hapi/boom";
-import { ExtendedError, Rethrow, Logger } from '@core/util';
+import {Request, ResponseObject, ResponseToolkit} from '@hapi/hapi';
+import {Boom, boomify} from "@hapi/boom";
+import {ExtendedError, Rethrow} from '@core/util';
 
 export abstract class BaseController {
   private _request: Request | undefined;
@@ -22,9 +22,6 @@ export abstract class BaseController {
     }
   }
 
-  constructor(protected logger: Logger) {
-  }
-
   protected abstract async executeImpl(): Promise<void | any>;
 
   async execute(request: Request, response: ResponseToolkit ): Promise<ResponseObject> {
@@ -37,14 +34,6 @@ export abstract class BaseController {
   private respondError(error?: Error | ExtendedError | Rethrow): Boom {
     if (!error) {
       return new Boom();
-    }
-
-    this.logger.info('Full Error Object', { error: error });
-
-    if (error.stack) {
-      this.logger.alert('Error Stack', { error: error });
-    } else {
-      this.logger.alert('No Error stack to log');
     }
 
     if (error.hasOwnProperty('options') && (error as ExtendedError).options.http) {

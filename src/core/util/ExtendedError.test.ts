@@ -1,21 +1,10 @@
 import * as chai from 'chai';
-import * as sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
-import { ExtendedError, Rethrow } from './';
+import {ExtendedError, Rethrow} from './';
 
 chai.use(chaiAsPromised);
 
 describe('ExtendedErrorLib', () => {
-  let sandbox: sinon.SinonSandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.createSandbox();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   describe('ExtendedError', () => {
     it('constructs ExtendedError with message and options', () => {
       const expected = {

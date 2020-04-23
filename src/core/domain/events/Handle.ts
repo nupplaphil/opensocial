@@ -1,5 +1,5 @@
-import { DomainEvent } from "@core/domain";
+import {DomainEventInterface} from "@core/domain";
 
-export interface Handle<T extends DomainEvent> {
+export interface Handle<T extends DomainEventInterface> {
   setupSubscriptions(): void;
 }
