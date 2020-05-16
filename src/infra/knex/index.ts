@@ -1,1 +1,3 @@
-export * from './knex';
+import knex, { Transaction, TABLES } from './knex';
+
+export {knex, Transaction, TABLES};
