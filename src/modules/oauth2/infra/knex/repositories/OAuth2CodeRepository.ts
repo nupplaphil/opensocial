@@ -2,17 +2,15 @@ import Knex, {QueryBuilder} from "knex";
 import {TABLES} from "@db";
 
 import {UserRepositoryInterface} from "@modules/user/repositories/UserRepositoryInterface";
-import {OAuth2ClientRepositoryInterface} from "@modules/oauth2/repositories";
+import {OAuth2ClientRepositoryInterface, OAuth2CodesRepositoryInterface} from "@modules/oauth2/repositories";
 
 import {OAuth2CodeRecord} from "@modules/oauth2/infra/knex/records";
 import {OAuth2Code, OAuth2CodeChallengeMethod} from "@modules/oauth2/domain";
-import {OAuth2CodesRepositoryInterface} from "@modules/oauth2/repositories";
 import {NotFound} from "@modules/oauth2/domain/error";
 import {CallType, PromiseCallType} from "@core/usecase/PromiseCallType";
 
 export const getCodeByCode = (codeBuilder: CallType<QueryBuilder<OAuth2CodeRecord>>, clientRepo: OAuth2ClientRepositoryInterface, userRepo: UserRepositoryInterface) => async (code: string): Promise<OAuth2Code> => {
   const record = (await codeBuilder().where({
-    // eslint-disable-next-line @typescript-eslint/camelcase
     code: code,
   }).first()) as OAuth2CodeRecord;
 
@@ -55,15 +53,10 @@ export const createCode = (codeBuilder:  CallType<QueryBuilder<OAuth2CodeRecord>
 
   const result = await codeBuilder().insert({
     code: code.code,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     code_challenge: code.codeChallenge,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     code_challenge_method: code.codeChallengeMethod,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     client_id: code.client.clientId,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     user_id: code.user.id,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     created_at: created,
   });
 

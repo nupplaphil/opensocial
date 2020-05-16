@@ -31,7 +31,8 @@ module.exports = {
       {
         "varsIgnorePattern": "should|expect"
       }
-    ]
+    ],
+    "@typescript-eslint/camelcase": [0],
   },
   // other configuration are omitted for brevity
   settings: {

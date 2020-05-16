@@ -122,7 +122,6 @@ export const updateUser = (users: CallType<QueryBuilder<UserRecord>>) => async (
     await users().update({
       email: user.email,
       name: user.name,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       updated_at: new Date(),
     }).where("id", user.id);
 

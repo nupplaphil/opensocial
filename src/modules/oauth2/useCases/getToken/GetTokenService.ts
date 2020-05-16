@@ -48,13 +48,9 @@ export const withAuthorizationCode = (tokenService: TokenServiceInterface) => as
   const token = await tokenService.generateFromCode(client, payload.code, payload.code_verifier);
 
   return {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: token.accessToken,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     token_type: token.tokenType,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token: token.refreshToken,
   }
 };
@@ -63,11 +59,8 @@ export const withClientCredentials = (tokenService: TokenServiceInterface) => as
   const token = await tokenService.generateForClient(client);
 
   return {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: token.accessToken,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     token_type: token.tokenType,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
   };
 };
@@ -78,13 +71,9 @@ export const withPassword = (tokenService: TokenServiceInterface, userRepo: User
   const token = await tokenService.generateForUser(client, user);
 
   return {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: token.accessToken,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     token_type: token.tokenType,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token: token.refreshToken,
   }
 };
@@ -97,13 +86,9 @@ export const withRefreshToken = (tokenService: TokenServiceInterface) => async (
   const token = await tokenService.generateFromRefreshToken(client, payload.refresh_token);
 
   return {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: token.accessToken,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     token_type: token.tokenType,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token: token.refreshToken,
   };
 };

@@ -38,7 +38,6 @@ export const getTokenByToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenR
     case "access":
     default:
       query = tokenBuilder().where({
-        // eslint-disable-next-line @typescript-eslint/camelcase
         access_token: token
       }).andWhere('access_token_expires', '>', Date.now())
         .first();
@@ -83,21 +82,13 @@ export const createToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecor
   const created = new Date();
 
   const result = await tokenBuilder().insert({
-    // eslint-disable-next-line @typescript-eslint/camelcase
     client_id: token.client.id,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token: token.accessToken,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token: token.refreshToken,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     user_id: token.user.id,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token_expires: token.accessTokenExpires,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token_expires: token.refreshTokenExpires,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     created_at: created,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     updated_at: created,
   });
 
@@ -119,11 +110,8 @@ export const updateToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecor
   const updated = new Date();
 
   await tokenBuilder().update({
-    // eslint-disable-next-line @typescript-eslint/camelcase
     access_token_expires: token.accessTokenExpires,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     refresh_token_expires: token.refreshTokenExpires,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     updated_at: updated,
   }).where({id: token.id});
 

@@ -88,11 +88,8 @@ export const updateClient = (clientBuilder: () => QueryBuilder<OAuth2ClientRecor
 
   await clientBuilder().update({
     name: client.name,
-    // eslint-disable-next-line @typescript-eslint/camelcase
     client_secret: client.clientSecret.toString(),
-    // eslint-disable-next-line @typescript-eslint/camelcase
     allow_grant_types: client.allowGrantTypes.join(' '),
-    // eslint-disable-next-line @typescript-eslint/camelcase
     updated_at: updated,
   }).where({id: client.id});
 

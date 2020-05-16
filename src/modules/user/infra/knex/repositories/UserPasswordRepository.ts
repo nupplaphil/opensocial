@@ -10,7 +10,6 @@ import {User} from "@modules/user/domain";
 export const createUserPassword = (passwordBuilder: CallType<QueryBuilder<UserPasswordRecord>>) => async (user: User, password: string): Promise<void> => {
   await passwordBuilder().insert({
     password: new Buffer(await bcrypt.hash(password, 12)),
-    // eslint-disable-next-line @typescript-eslint/camelcase
     user_id: user.id,
   });
 }
@@ -19,7 +18,6 @@ export const updateUserPassword = (passwordBuilder: CallType<QueryBuilder<UserPa
   await passwordBuilder().update({
     password: new Buffer(await bcrypt.hash(password, 12)),
   }).where({
-    // eslint-disable-next-line @typescript-eslint/camelcase
     user_id: user.id
   });
 }
@@ -28,7 +26,6 @@ export const validateUserPassword = (passwordBuilder: CallType<QueryBuilder<User
   const passwords = await passwordBuilder()
     .select()
     .where({
-      // eslint-disable-next-line @typescript-eslint/camelcase
     user_id: user.id
   }) as UserPasswordRecord[];
 
