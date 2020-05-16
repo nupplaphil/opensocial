@@ -1,9 +1,6 @@
 {
-  "check-coverage": false,
-  "lines": 80,
-  "statements": 80,
-  "functions": 80,
-  "branches": 80,
+  "check-coverage": true,
+  "lines": 0,
   "per-file": true,
   "include": [
     "src/**/*.ts",
@@ -19,7 +16,7 @@
   ],
   "cache": true,
   "all": true,
-  "instrument": false,
-  "sourceMap": false,
+  "instrument": true,
+  "sourceMap": true,
   "report-dir": "./artifacts/istanbul"
 }
