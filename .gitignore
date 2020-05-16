@@ -11,4 +11,3 @@ artifacts
 .nyc_output
 *.sqlite
 *.sqlite3
-knexfile.ts

@@ -1,7 +1,14 @@
 import convict from 'convict';
 import {existsSync} from 'fs';
+import {Config} from './types';
 
-const config = convict({
+const config = convict<Config>({
+  name: {
+    doc: 'Name of the Node',
+    format: String,
+    default: 'OpenSocial',
+    env: 'NODE_NAME',
+  },
   env: {
     doc: 'Environment',
     format: String,
@@ -26,24 +33,108 @@ const config = convict({
     default: true,
     env: 'ENABLE_LOGS',
   },
-  host: {
-    doc: 'Hostname or IP address the server will listen on',
-    format: String,
-    default: '0.0.0.0',
-    env: 'HOST',
+  server: {
+    host: {
+      doc: 'Hostname or IP address the server will listen on',
+      format: String,
+      default: '0.0.0.0',
+      env: 'HOST',
+    },
+    port: {
+      doc: 'Port the server will listen on',
+      format: 'port',
+      default: 8000,
+      env: 'PORT',
+    },
+    protocol: {
+      doc: 'Protocol used',
+      format: ['http', 'https', 'socket'],
+      default: 'http',
+      env: 'PROTOCOL',
+    },
   },
-  port: {
-    doc: 'Port the server will listen on',
-    format: 'port',
-    default: 8000,
-    env: 'PORT',
+  db: {
+    client: {
+      doc: 'Database client',
+      format: ['sqlite', 'postgresql', 'mysql'],
+      default: 'sqlite',
+      env: 'DATABASE_CLIENT',
+    },
+    connection: {
+      filename: {
+        doc: 'Filename of the SQLite file',
+        format: String,
+        default: 'dev.sqlite3',
+        env: 'DATABASE_SQLITE',
+      },
+      host: {
+        doc: 'Database host',
+        format: String,
+        default: 'localhost',
+        env: 'DATABASE_HOSTNAME',
+      },
+      database: {
+        doc: 'Database name',
+        format: String,
+        default: 'opensocial',
+        env: 'DATABASE_NAME',
+      },
+      user: {
+        doc: 'Database username',
+        format: String,
+        default: 'opensocial',
+        env: 'DATABASE_USERNAME',
+      },
+      password: {
+        doc: 'Database password',
+        format: String,
+        default: 'opensocial',
+        env: 'DATABASE_PASSWORD',
+      },
+      port: {
+        doc: 'Database port',
+        format: Number,
+        default: 5432,
+        env: 'DATABASE_PORT',
+      },
+    },
+    pool: {
+      min: {
+        doc: 'Database minimum connections',
+        format: Number,
+        default: 0,
+        env: 'DATABASE_POOL_MIN',
+      },
+      max: {
+        doc: 'Database maximum connections',
+        format: Number,
+        default: 19,
+        env: 'DATABASE_POOL_MAX',
+      },
+    }
   },
-  protocol: {
-    doc: 'Protocol used',
-    format: ['http', 'https', 'socket'],
-    default: 'http',
-    env: 'PROTOCOL',
-  },
+  oauth2: {
+    expiry: {
+      accessToken: {
+        doc: 'Duration until a access token is expired',
+        format: Number,
+        default: 600,
+        env: "OAUTH2_EXPIRE_ACCESS_TOKEN",
+      },
+      refreshToken: {
+        doc: 'Duration until a refresh token is expired',
+        format: Number,
+        default: 3600 * 6,
+        env: "OAUTH2_EXPIRE_REFRESH_TOKEN",
+      },
+      code: {
+        doc: 'Duration until the token code is expired',
+        format: Number,
+        default: 600,
+        env: "OAUTH2_EXPIRE_CODE",
+      }
+    }
+  }
 });
 
 if (config.get('env') === 'development' && existsSync(config.get('envFilePath'))) {

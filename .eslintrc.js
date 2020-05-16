@@ -4,8 +4,10 @@ module.exports = {
     commonjs: true,
     es6: true,
     node: true,
+    mocha: true
   },
   extends: [
+    'eslint:recommended',
     'plugin:@typescript-eslint/recommended',  // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     'prettier/@typescript-eslint',  // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
   ],
@@ -22,8 +24,14 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
-    '@typescript-eslint/no-unused-vars': [2, { args: 'none' }],
-    '@typescript-eslint/no-explicit-any': [0]
+    '@typescript-eslint/no-unused-vars': [2, {args: 'none'}],
+    '@typescript-eslint/no-explicit-any': [0],
+    "no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "should|expect"
+      }
+    ]
   },
   // other configuration are omitted for brevity
   settings: {

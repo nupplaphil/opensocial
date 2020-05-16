@@ -24,18 +24,26 @@ module.exports = {
   module: {
     rules: [].concat(
       isCoverage ? {
-        test: /\.ts$/,
+        test: /\.ts(x?)$/,
         include: [
           path.resolve(__dirname, 'src'),
         ],
-        loader: 'istanbul-instrumenter-loader'
+        use: [
+          {
+            loader: 'istanbul-instrumenter-loader'
+          }
+        ],
       } : [],
       {
-        test: /\.ts$/,
+        test: /\.ts(x?)$/,
         include: [
-          path.resolve(__dirname, 'src')
+          path.resolve(__dirname, 'src'),
         ],
-        loader: 'ts-loader'
+        use: [
+          {
+            loader: 'ts-loader',
+          },
+        ],
       }
     ),
   }
