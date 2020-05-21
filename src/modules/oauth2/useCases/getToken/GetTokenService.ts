@@ -50,6 +50,7 @@ export const withAuthorizationCode = (tokenRepo: OAuth2TokenRepositoryInterface,
     const codeRecord = await codesRepo.getByCode(payload.code);
     const token = await codeRecord.createToken(client, payload.code_verifier);
 
+    await codesRepo.delete(codeRecord);
     await tokenRepo.save(token);
 
     return {
@@ -111,6 +112,7 @@ export const withRefreshToken = (tokenRepo: OAuth2TokenRepositoryInterface) => a
     const oldToken = await tokenRepo.getByRefreshToken(payload.refresh_token);
     const newToken = await oldToken.createNewToken(client);
 
+    await tokenRepo.delete(oldToken);
     await tokenRepo.save(newToken);
 
     return {

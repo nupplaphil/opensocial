@@ -19,6 +19,10 @@ export const post = (getTokenService: GetTokenServiceInterface,
               clientRepository: OAuth2ClientRepositoryInterface) => async (ctx: Context): Promise<void> => {
   sendCORSHeaders(ctx);
 
+  if (!ctx.request.body?.hasOwnProperty('grant_type')) {
+    throw new UnsupportedGrantType('The "grant_type" property is required');
+  }
+
   const grantType = ctx.request.body.grant_type as OAuth2GrantType;
 
   if (!OAuth2GrantType.includes(grantType)) {

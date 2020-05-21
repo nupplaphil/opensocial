@@ -17,13 +17,13 @@ export type OAuth2CodeProps = {
   user: User,
 
   code: string,
-  codeChallenge: string,
-  codeChallengeMethod: OAuth2CodeChallengeMethod,
+  codeChallenge?: string,
+  codeChallengeMethod?: OAuth2CodeChallengeMethod,
 
   created?: Date,
 };
 
-export const validatePKCE = (codeVerifier: string | undefined, codeChallenge: string | undefined, codeChallengeMethod: OAuth2CodeChallengeMethod): void => {
+export const validatePKCE = (codeVerifier: string | undefined, codeChallenge: string | undefined, codeChallengeMethod: OAuth2CodeChallengeMethod | undefined): void => {
   if (!codeChallenge && !codeVerifier) {
     // This request was not initiated with PKCE support, so ignore the validation
     return;
@@ -70,11 +70,11 @@ export class OAuth2Code extends AggregateRoot<OAuth2CodeProps> {
     return this.props.code;
   }
 
-  get codeChallenge(): string {
+  get codeChallenge(): string | undefined {
     return this.props.codeChallenge;
   }
 
-  get codeChallengeMethod(): OAuth2CodeChallengeMethod {
+  get codeChallengeMethod(): OAuth2CodeChallengeMethod | undefined {
     return this.props.codeChallengeMethod;
   }
 
@@ -94,7 +94,7 @@ export class OAuth2Code extends AggregateRoot<OAuth2CodeProps> {
       throw new UnauthorizedClient('The client associated with the token did not match with the authenticated client credentials');
     }
 
-    if ((this.props.created ? this.props.created.getMilliseconds() : 0) + expiryConfig.code < Math.floor(Date.now() / 1000)) {
+    if (this._created.getTime() + expiryConfig.code < Math.floor(Date.now() / 1000)) {
       throw new InvalidRequest('The supplied code has expired.');
     }
 
@@ -128,6 +128,18 @@ export class OAuth2Code extends AggregateRoot<OAuth2CodeProps> {
 
       return code;
     }
+  }
+
+  static async createForUser(client: OAuth2Client, user: User, codeChallenge?: string, codeChallengeMethod?: OAuth2CodeChallengeMethod): Promise<OAuth2Code> {
+    const code = crypto.randomBytes(32).toString('base64').replace('=', '');
+
+    return OAuth2Code.create({
+      client: client,
+      user: user,
+      code: code,
+      codeChallenge: codeChallenge,
+      codeChallengeMethod: codeChallengeMethod,
+    })
   }
 
   static fromCode(code: OAuth2Code, id?: number): OAuth2Code {

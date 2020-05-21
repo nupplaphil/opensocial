@@ -48,7 +48,7 @@ export const getOAuth2ClientFromBasicAuth = (clientRepo: OAuth2ClientRepositoryI
 }
 
 export const getOauth2ClientFromBody = (clientRepo: OAuth2ClientRepositoryInterface) => async(ctx: Context): Promise<OAuth2Client> => {
-  if (!ctx.request.body.client_id) {
+  if (!ctx.request.body?.hasOwnProperty('client_id')) {
     throw new InvalidRequest('The "client_id" property is required');
   }
 

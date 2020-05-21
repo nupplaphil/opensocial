@@ -29,7 +29,7 @@ export async function up(knex: Knex): Promise<void> {
     loginTable.string('headers');
     loginTable.boolean('success');
     loginTable.integer('event_type', 8).notNullable();
-    loginTable.dateTime('created_at').notNullable();
+    loginTable.timestamp('created_at', {useTz: false}).notNullable().defaultTo(knex.fn.now());
 
     // Foreign Key
     loginTable.foreign('user_id').references('id').inTable('users');
@@ -40,7 +40,7 @@ export async function up(knex: Knex): Promise<void> {
     logTable.increments();
 
     // Data
-    logTable.timestamp('createdAt');
+    logTable.timestamp('created_at', {useTz: false}).notNullable().defaultTo(knex.fn.now());
     logTable.string('domain');
     logTable.enum('level', []).notNullable();
     logTable.string('message', 2048);
@@ -97,7 +97,7 @@ export async function up(knex: Knex): Promise<void> {
     codeTable.string('code_challenge', 50).notNullable();
     codeTable.string('code_challenge_method', 50).notNullable();
 
-    codeTable.dateTime('created_at').notNullable();
+    codeTable.timestamp('created_at', {useTz: false}).notNullable().defaultTo(knex.fn.now());
 
     codeTable.foreign('client_id').references('client_id').inTable(TABLES.OAUTH2CLIENT);
     codeTable.foreign('user_id').references('id').inTable(TABLES.USER);
