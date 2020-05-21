@@ -1,8 +1,6 @@
 import Knex, {QueryBuilder} from "knex";
 import {TABLES} from "@db";
 
-import {UserRepositoryInterface} from "@modules/user/repositories";
-
 import {OAuth2Token} from "@modules/oauth2/domain";
 import {OAuth2TokenRepositoryInterface} from "@modules/oauth2/repositories/OAuth2TokenRepositoryInterface";
 import {OAuth2TokenRecord} from "@modules/oauth2/infra/knex/records";
@@ -10,28 +8,31 @@ import {OAuth2ClientRepositoryInterface} from "@modules/oauth2/repositories";
 import {NotFound} from "@modules/oauth2/domain/error";
 import {CallType, PromiseCallType} from "@core/usecase/PromiseCallType";
 
-export const getTokenById = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>, clientRepo: OAuth2ClientRepositoryInterface, userRepo: UserRepositoryInterface) => async (id: number): Promise<OAuth2Token> => {
-  const row = (await tokenBuilder().where({ id })) as OAuth2TokenRecord;
+export const recordToModel = async(clientRepo: OAuth2ClientRepositoryInterface, record: OAuth2TokenRecord): Promise<OAuth2Token> => {
+  const client = await clientRepo.getById(record.id);
 
-  if (!row) {
+  return OAuth2Token.create({
+    accessToken: record.access_token,
+    refreshToken: record.refresh_token,
+    accessTokenExpires: record.access_token_expires,
+    refreshTokenExpires: record.refresh_token_expires,
+    tokenType: "bearer",
+    client: client,
+    user: client.user,
+  }, record.id);
+}
+
+export const getTokenById = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>, clientRepo: OAuth2ClientRepositoryInterface) => async (id: number): Promise<OAuth2Token> => {
+  const record = (await tokenBuilder().where({ id })) as OAuth2TokenRecord;
+
+  if (!record) {
     throw new NotFound('Token not found');
   }
 
-  return {
-    id: row.id,
-    accessToken: row.access_token,
-    refreshToken: row.refresh_token,
-    accessTokenExpires: row.access_token_expires,
-    refreshTokenExpires: row.refresh_token_expires,
-    tokenType: "bearer",
-    user: await userRepo.getActiveById(row.user_id),
-    client: await clientRepo.getById(row.id),
-    created: row.created_at,
-    updated: row.updated_at,
-  };
+  return await recordToModel(clientRepo, record);
 };
 
-export const getTokenByToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>, clientRepo: OAuth2ClientRepositoryInterface, userRepo: UserRepositoryInterface, type: 'access' | 'refresh') => async (token: string): Promise<OAuth2Token> => {
+export const getTokenByToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>, clientRepo: OAuth2ClientRepositoryInterface, type: 'access' | 'refresh') => async (token: string): Promise<OAuth2Token> => {
   let query: QueryBuilder<OAuth2TokenRecord>;
 
   switch (type) {
@@ -51,94 +52,49 @@ export const getTokenByToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenR
       break;
   }
 
-  const row = await query as OAuth2TokenRecord;
+  const record = await query as OAuth2TokenRecord;
 
-  if (!row) {
+  if (!record) {
     throw new NotFound('Token not found');
   }
 
-  return {
-    id: row.id,
-    client: await clientRepo.getById(row.id),
-    user: await userRepo.getActiveById(row.user_id),
-    tokenType: "bearer",
-    accessToken: row.access_token,
-    refreshToken: row.refresh_token,
-    accessTokenExpires: row.access_token_expires,
-    refreshTokenExpires: row.refresh_token_expires,
-    created: row.created_at,
-    updated: row.updated_at,
-  };
+  return await recordToModel(clientRepo, record);
 };
 
 export const deleteToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>) => async (token: OAuth2Token): Promise<void> => {
   await tokenBuilder().delete().where({
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    access_token: token.accessToken
+    id: token.id
   })
 }
 
-export const createToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>) => async (token: OAuth2Token): Promise<OAuth2Token> => {
-  const created = new Date();
+export const saveToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>) => async (token: OAuth2Token): Promise<OAuth2Token> => {
 
-  const result = await tokenBuilder().insert({
-    client_id: token.client.id,
-    access_token: token.accessToken,
-    refresh_token: token.refreshToken,
-    user_id: token.user.id,
-    access_token_expires: token.accessTokenExpires,
-    refresh_token_expires: token.refreshTokenExpires,
-    created_at: created,
-    updated_at: created,
-  });
+  if (!token.isSaved) {
+    const result = await tokenBuilder().insert({
+      client_id: token.client.id,
+      access_token: token.accessToken,
+      refresh_token: token.refreshToken,
+      user_id: token.user.id,
+      access_token_expires: token.accessTokenExpires,
+      refresh_token_expires: token.refreshTokenExpires,
+      created_at: token.created,
+    });
 
-  return {
-    id: result[0],
-    client: token.client,
-    user: token.user,
-    tokenType: "bearer",
-    accessToken: token.accessToken,
-    refreshToken: token.refreshToken,
-    accessTokenExpires: token.accessTokenExpires,
-    refreshTokenExpires: token.refreshTokenExpires,
-    created: created,
-    updated: created,
+    return OAuth2Token.fromToken(token, result[0]);
+  } else {
+    return token;
   }
 }
 
-export const updateToken = (tokenBuilder: CallType<QueryBuilder<OAuth2TokenRecord>>) => async (token: OAuth2Token): Promise<OAuth2Token> => {
-  const updated = new Date();
-
-  await tokenBuilder().update({
-    access_token_expires: token.accessTokenExpires,
-    refresh_token_expires: token.refreshTokenExpires,
-    updated_at: updated,
-  }).where({id: token.id});
-
-  return {
-    id: token.id,
-    client: token.client,
-    user: token.user,
-    tokenType: "bearer",
-    accessToken: token.accessToken,
-    refreshToken: token.refreshToken,
-    accessTokenExpires: token.accessTokenExpires,
-    refreshTokenExpires: token.refreshTokenExpires,
-    created: token.created,
-    updated: updated,
-  };
-}
-
-export default async function (knex: PromiseCallType<Knex>, clientRepo: Promise<OAuth2ClientRepositoryInterface>, userRepo: Promise<UserRepositoryInterface>): Promise<OAuth2TokenRepositoryInterface> {
+export default async function (knex: PromiseCallType<Knex>, clientRepo: Promise<OAuth2ClientRepositoryInterface>): Promise<OAuth2TokenRepositoryInterface> {
   const locKnex = await knex();
   const token = (): QueryBuilder => locKnex.table(TABLES.OAUTH2TOKEN);
 
   return {
-    getById: getTokenById(token, await clientRepo, await userRepo),
-    getByRefreshToken: getTokenByToken(token, await clientRepo, await userRepo, "refresh"),
-    getByAccessToken: getTokenByToken(token, await clientRepo, await userRepo, "access"),
-    create: createToken(token),
-    update: updateToken(token),
+    getById: getTokenById(token, await clientRepo),
+    getByRefreshToken: getTokenByToken(token, await clientRepo, "refresh"),
+    getByAccessToken: getTokenByToken(token, await clientRepo, "access"),
+    save: saveToken(token),
     delete: deleteToken(token)
   }
 }

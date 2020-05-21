@@ -4,8 +4,9 @@ export type UserRecord = {
   id: number,
   name: string,
   username: string,
+  password?: string,
   email: string,
-  guid: string,
+  uuid: string,
   type: number,
   active: number,
 } & Timestamps;

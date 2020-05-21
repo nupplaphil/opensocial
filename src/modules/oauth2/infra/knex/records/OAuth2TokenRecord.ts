@@ -1,5 +1,3 @@
-import {Timestamps} from "@db/records/Timestamps";
-
 export type OAuth2TokenRecord = {
   id: number,
   client_id: number,
@@ -9,4 +7,6 @@ export type OAuth2TokenRecord = {
   refresh_token: string,
   access_token_expires: number,
   refresh_token_expires: number,
-} & Timestamps;
+
+  created_at: Date,
+};

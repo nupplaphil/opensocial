@@ -10,19 +10,13 @@ export async function up(knex: Knex): Promise<void> {
     // Data
     usersTable.string('name', 50).notNullable();
     usersTable.string('username', 50).notNullable().unique();
+    usersTable.string('password', 60);
     usersTable.string('email', 250).notNullable().unique();
-    usersTable.string('guid', 50).notNullable().unique();
+    usersTable.uuid('uuid').notNullable().unique();
     usersTable.integer('type', 1).notNullable().defaultTo(1).comment('1 = user, 2 = app, 3 = group');
     usersTable.integer('active', 1).notNullable().defaultTo(1);
 
     usersTable.timestamps(true, true);
-  }
-
-  function createUserPasswordsTable(userPasswordsTable: TableBuilder): void {
-    userPasswordsTable.increments('user_id');
-    userPasswordsTable.string('password', 60).notNullable();
-
-    userPasswordsTable.foreign('user_id').references('id').inTable('user');
   }
 
   function createUserLogsTable(loginTable: TableBuilder): void {
@@ -112,7 +106,6 @@ export async function up(knex: Knex): Promise<void> {
   return knex
     .schema
     .createTable(TABLES.USER, createUsersTable)
-    .createTable(TABLES.USERPASSWORD, createUserPasswordsTable)
     .createTable(TABLES.USERLOG, createUserLogsTable)
     .createTable(TABLES.LOG, createLogTable)
     .createTable(TABLES.OAUTH2CLIENT, createOAuth2ClientTable)
@@ -127,7 +120,6 @@ export async function down(knex: Knex): Promise<void> {
   return knex
     .schema
     .dropTableIfExists(TABLES.USER)
-    .dropTableIfExists(TABLES.USERPASSWORD)
     .dropTableIfExists(TABLES.USERLOG)
     .dropTableIfExists(TABLES.LOG)
     .dropTableIfExists(TABLES.OAUTH2CLIENT)

@@ -1,6 +1,6 @@
 import {Application} from "@curveball/core";
 import config from "@config/environment";
-import {accessLog} from "@curveball/accesslog";
+import accessLog from "@curveball/accesslog";
 import middleware from './middleware';
 
 export async function create(): Promise<Application> {
@@ -11,9 +11,11 @@ export async function create(): Promise<Application> {
   return app;
 }
 
-export async function start(): Promise<void> {
+export async function start(port: number |null ): Promise<void> {
   const app = await create();
-  const port = config.get('server').port;
+  if (!port) {
+    port = config.get('server').port;
+  }
 
   app.listen(port);
 

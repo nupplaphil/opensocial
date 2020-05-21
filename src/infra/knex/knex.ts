@@ -6,7 +6,6 @@ export type Transaction = Knex.Transaction;
 
 export const TABLES: { [key: string] : string } = {
   USER: 'users',
-  USERPASSWORD: 'user_passwords',
   USERTOTP: 'user_totp',
   USERLOG: 'user_logs',
   LOG: 'logs',

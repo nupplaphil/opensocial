@@ -1,13 +1,38 @@
 import * as chai from 'chai';
 import {knex, TABLES} from '@db';
-import {getUserById, getActiveUserById, createUser, updateUser} from './UserRepository';
-import Knex = require("knex");
+import {getActiveUserById, getUserById, saveUser} from './UserRepository';
 import {QueryBuilder} from "knex";
-import {NewUser, User} from "../../../domain";
+import {User, UserProps} from "../../../domain";
 import chaiDatetime from "chai-datetime";
+import {UniqueEntityID} from "../../../../../core/domain/UniqueEntityID";
+import Knex = require("knex");
 
 chai.use(chaiDatetime);
 const expect = chai.expect;
+
+const equalUser = (user: User, expectUser: User, id?: number): void => {
+  if (user.isSaved && expectUser.isSaved) {
+    expect(user.id).to.be.eq(expectUser.id);
+  } else if (id !== undefined) {
+    expect(user.id).to.be.eq(id);
+  }
+  expect(user.username).to.be.eq(expectUser.username);
+  //expect(user.password).to.be.eq(expectUser.password ? expectUser.password : undefined);
+  expect(user.email).to.be.eq(expectUser.email);
+  expect(user.uuid.equals(expectUser.uuid)).to.be.true;
+  expect(user.active).to.be.eq(expectUser.active);
+  expect(user.type).to.be.eq(expectUser.type);
+}
+
+const equalProps = (user: User, expectProps: UserProps, id?: number): void => {
+  expect(user.id).to.be.eq(id);
+  expect(user.username).to.be.eq(expectProps.username);
+  //expect(user.password).to.be.eq(expectProps.password ? expectProps.password : undefined);
+  expect(user.email).to.be.eq(expectProps.email);
+  expect(user.uuid.equals(expectProps.uuid)).to.be.true;
+  expect(user.active).to.be.eq(expectProps.active);
+  expect(user.type).to.be.eq(expectProps.type);
+}
 
 describe('UserRepository', () => {
   let data: Knex;
@@ -37,28 +62,27 @@ describe('UserRepository', () => {
     it('returns an user with an ID', async () => {
       const user: User = await findUser(2);
 
-      expect(user).to.include({
-        id: 2,
+      equalProps(user, {
         username: 'testuser2',
-        created: user.created,
         email: 'me@isomr2.co',
-        guid: 'f03ede7c-b121-4112-bcc7-130a3e87988c',
+        uuid: new UniqueEntityID('f03ede7c-b121-4112-bcc7-130a3e87988c'),
+        name: 'Test User 2',
         active: true,
         type: 'user',
-      });
+      } as UserProps, 2);
     });
 
     it('returns an inactive user with an ID', async () => {
       const user: User = await findUser(1);
 
-      expect(user).to.include({
-        id: 1,
+      equalProps(user, {
         username: 'testuser',
         email: 'me@isomr.co',
-        guid: 'f03ede7c-b121-4112-bcc7-130a3487988c',
+        uuid: new UniqueEntityID('f03ede7c-b121-4112-bcc7-130a3487988c'),
+        name: 'Test User 1',
         active: false,
         type: 'user',
-      });
+      } as UserProps, 1);
     });
 
     it('throws an exception without an ID', async () => {
@@ -86,15 +110,14 @@ describe('UserRepository', () => {
     it('returns an active user', async () => {
       const user: User = await findActiveUser(2);
 
-      expect(user).to.include({
-        id: 2,
+      equalProps(user, {
         username: 'testuser2',
-        created: user.created,
         email: 'me@isomr2.co',
-        guid: 'f03ede7c-b121-4112-bcc7-130a3e87988c',
+        uuid: new UniqueEntityID('f03ede7c-b121-4112-bcc7-130a3e87988c'),
+        name: 'Test User 2',
         active: true,
         type: 'user',
-      });
+      } as UserProps, 2);
     });
 
     it('throws an exception with an inactive user', async () => {
@@ -104,49 +127,49 @@ describe('UserRepository', () => {
     });
   });
 
-  describe('Function "insertUser"', async () => {
+  describe('Function "saveUser"', async () => {
     let insert: Function;
     let findById: Function;
 
     beforeEach(async () => {
       const users = (): QueryBuilder => data.table(TABLES.USER);
-      insert = await createUser(users);
+      insert = await saveUser(users);
       expect(insert).to.be.ok;
       findById = await getUserById(users);
       expect(findById).to.be.ok;
     });
 
     it('inserts a new user', async () => {
-      const newUser: NewUser = {
+      const newUser = await User.create({
         email: 'test@test.it',
         name: 'a new user',
         username: 'testuser3',
-        guid: '123455',
+        uuid: new UniqueEntityID('123455'),
         type: 'group',
         active: true
-      };
+      });
 
       const user: User = await insert(newUser);
 
       expect(user).to.be.an('object');
-      expect(user).has.property('id', 3)
-      expect(user).to.include(newUser);
+      expect(user).has.property('id', 3);
+
+      equalUser(user, newUser);
 
       const currUser: User = await findById(user.id);
 
-      expect(currUser).to.include(user);
-      expect(currUser.created).to.be.an('Date').that.is.beforeTime(new Date());
+      equalUser(user, currUser);
     });
 
     it('throws an error for missing fields', async () => {
-      return insert({
+      return insert(await User.create({
         email: 'test@test.it',
         name: 'a new user',
         username: 'testuser3',
-        guid: '123455',
+        uuid: new UniqueEntityID('123455'),
         type: 'group',
         active: true
-      } as NewUser).catch((err: Error) => {
+      })).catch((err: Error) => {
         expect(err).to.include({errno: 19, code: "SQLITE_CONSTRAINT"});
       });
     });
@@ -158,7 +181,7 @@ describe('UserRepository', () => {
 
     beforeEach(async () => {
       const users = (): QueryBuilder => data.table(TABLES.USER);
-      update = await updateUser(users);
+      update = await saveUser(users);
       expect(update).to.be.ok;
       findById = await getUserById(users);
       expect(findById).to.be.ok;
@@ -167,15 +190,20 @@ describe('UserRepository', () => {
     it('updates an user', async () => {
       const currUser: User = await findById(1);
 
-      const newUser = {
+      const newUser = await User.create({
+        active: currUser.active,
+        created: currUser.created,
+        email: currUser.email,
         name: '12345BlaBla',
-        id: 1,
-        email: currUser.email
-      };
+        password: currUser.password,
+        type: currUser.type,
+        username: currUser.username,
+        uuid: currUser.uuid,
+      }, currUser.id);
 
       const updatedUser: User = await update(newUser);
 
-      expect(updatedUser).to.include(newUser);
+      equalUser(updatedUser, newUser);
       expect(updatedUser.name).not.eq(currUser.name);
     });
   });

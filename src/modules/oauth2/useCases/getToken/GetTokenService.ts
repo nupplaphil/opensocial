@@ -1,7 +1,8 @@
-import {OAuth2Client} from "@modules/oauth2/domain";
-import {TokenServiceInterface} from "@modules/oauth2/commons/TokenService";
-import {InvalidRequest} from "@modules/oauth2/domain/error";
 import {UserRepositoryInterface} from "@modules/user/repositories";
+
+import {OAuth2Client, OAuth2Token} from "@modules/oauth2/domain";
+import {InvalidGrant, InvalidRequest, NotFound} from "@modules/oauth2/domain/error";
+import {OAuth2CodesRepositoryInterface, OAuth2TokenRepositoryInterface} from "@modules/oauth2/repositories";
 
 export type AuthorizationCodeDTO = {
   code: string,
@@ -32,7 +33,7 @@ export interface GetTokenServiceInterface {
   withRefreshToken: (client: OAuth2Client, payload: RefreshTokenDTO) => Promise<ResponseDTO>;
 }
 
-export const withAuthorizationCode = (tokenService: TokenServiceInterface) => async (client: OAuth2Client, payload: AuthorizationCodeDTO): Promise<ResponseDTO> => {
+export const withAuthorizationCode = (tokenRepo: OAuth2TokenRepositoryInterface, codesRepo: OAuth2CodesRepositoryInterface) => async (client: OAuth2Client, payload: AuthorizationCodeDTO): Promise<ResponseDTO> => {
   if (!payload.code) {
     throw new InvalidRequest('The "code" property is required');
   }
@@ -45,18 +46,31 @@ export const withAuthorizationCode = (tokenService: TokenServiceInterface) => as
 //    throw new InvalidRequest('This value for "redirect_uri" is not recognized.');
 //  }
 
-  const token = await tokenService.generateFromCode(client, payload.code, payload.code_verifier);
+  try {
+    const codeRecord = await codesRepo.getByCode(payload.code);
+    const token = await codeRecord.createToken(client, payload.code_verifier);
 
-  return {
-    access_token: token.accessToken,
-    token_type: token.tokenType,
-    expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
-    refresh_token: token.refreshToken,
+    await tokenRepo.save(token);
+
+    return {
+      access_token: token.accessToken,
+      token_type: token.tokenType,
+      expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
+      refresh_token: token.refreshToken,
+    }
+  } catch (err) {
+    if (err instanceof NotFound) {
+      throw new InvalidRequest('The supplied code was not recognized');
+    } else {
+      throw err;
+    }
   }
 };
 
-export const withClientCredentials = (tokenService: TokenServiceInterface) => async (client: OAuth2Client): Promise<ResponseDTO> => {
-  const token = await tokenService.generateForClient(client);
+export const withClientCredentials = (tokenRepo: OAuth2TokenRepositoryInterface) => async (client: OAuth2Client): Promise<ResponseDTO> => {
+  const token = await OAuth2Token.createForClient(client);
+
+  await tokenRepo.save(token);
 
   return {
     access_token: token.accessToken,
@@ -65,10 +79,20 @@ export const withClientCredentials = (tokenService: TokenServiceInterface) => as
   };
 };
 
-export const withPassword = (tokenService: TokenServiceInterface, userRepo: UserRepositoryInterface) => async (client: OAuth2Client, payload: PasswordDTO): Promise<ResponseDTO> => {
-  const user = await userRepo.getValidUser(payload.username, payload.password);
+export const withPassword = (tokenRepo: OAuth2TokenRepositoryInterface, userRepo: UserRepositoryInterface) => async (client: OAuth2Client, payload: PasswordDTO): Promise<ResponseDTO> => {
+  const user = await userRepo.getByUsername(payload.username);
 
-  const token = await tokenService.generateForUser(client, user);
+  if (!user.password || !await user.password.compare(payload.password)) {
+    throw new InvalidGrant('Unknown username or password');
+  }
+
+  if (!user.active) {
+    throw new InvalidGrant('User is inactive');
+  }
+
+  const token = await OAuth2Token.createForUser(client, user);
+
+  await tokenRepo.save(token);
 
   return {
     access_token: token.accessToken,
@@ -78,27 +102,38 @@ export const withPassword = (tokenService: TokenServiceInterface, userRepo: User
   }
 };
 
-export const withRefreshToken = (tokenService: TokenServiceInterface) => async (client: OAuth2Client, payload: RefreshTokenDTO): Promise<ResponseDTO> => {
+export const withRefreshToken = (tokenRepo: OAuth2TokenRepositoryInterface) => async (client: OAuth2Client, payload: RefreshTokenDTO): Promise<ResponseDTO> => {
   if (!payload.refresh_token) {
-    throw new InvalidRequest('The "refres_token" property is required');
+    throw new InvalidRequest('The "refresh_token" property is required');
   }
 
-  const token = await tokenService.generateFromRefreshToken(client, payload.refresh_token);
+  try {
+    const oldToken = await tokenRepo.getByRefreshToken(payload.refresh_token);
+    const newToken = await oldToken.createNewToken(client);
 
-  return {
-    access_token: token.accessToken,
-    token_type: token.tokenType,
-    expires_in: token.accessTokenExpires - Math.round(Date.now() / 1000),
-    refresh_token: token.refreshToken,
-  };
+    await tokenRepo.save(newToken);
+
+    return {
+      access_token: newToken.accessToken,
+      token_type: newToken.tokenType,
+      expires_in: newToken.accessTokenExpires - Math.round(Date.now() / 1000),
+      refresh_token: newToken.refreshToken,
+    };
+  } catch (err) {
+    if (err instanceof NotFound) {
+      throw new InvalidGrant('The refresh token was not recognized');
+    } else {
+      throw err;
+    }
+  }
 };
 
-export default async function (tokenService: Promise<TokenServiceInterface>, userRepo: Promise<UserRepositoryInterface>): Promise<GetTokenServiceInterface> {
+export default async function (tokenRepo: Promise<OAuth2TokenRepositoryInterface>, codeRepo: Promise<OAuth2CodesRepositoryInterface>, userRepo: Promise<UserRepositoryInterface>): Promise<GetTokenServiceInterface> {
 
   return {
-    withAuthorizationCode: withAuthorizationCode(await tokenService),
-    withClientCredentials: withClientCredentials(await tokenService),
-    withPassword: withPassword(await tokenService, await userRepo),
-    withRefreshToken: withRefreshToken(await tokenService),
+    withAuthorizationCode: withAuthorizationCode(await tokenRepo, await codeRepo),
+    withClientCredentials: withClientCredentials(await tokenRepo),
+    withPassword: withPassword(await tokenRepo, await userRepo),
+    withRefreshToken: withRefreshToken(await tokenRepo),
   };
 }

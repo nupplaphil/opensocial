@@ -1,5 +1,4 @@
 import {Context} from "@curveball/core";
-import {TokenServiceInterface} from "@modules/oauth2/commons";
 import {OAuth2ClientRepositoryInterface} from "@modules/oauth2/repositories";
 import {OAuth2Client} from "@modules/oauth2/domain";
 import {InvalidRequest, NotFound, UnauthorizedClient} from "@modules/oauth2/domain/error";
@@ -24,16 +23,20 @@ export const parseBasic = (ctx: Context): null | [string, string] => {
   return decoded as [string, string];
 }
 
-export const getOAuth2ClientFromBasicAuth = (tokenService: TokenServiceInterface, clientRepo: OAuth2ClientRepositoryInterface) => async(ctx: Context): Promise<OAuth2Client> => {
-  let client: OAuth2Client;
-
+export const getOAuth2ClientFromBasicAuth = (clientRepo: OAuth2ClientRepositoryInterface) => async(ctx: Context): Promise<OAuth2Client> => {
   const basicAuth = parseBasic(ctx);
 
   if (!basicAuth) {
     throw new InvalidRequest('Authorization header is empty');
   } else {
     try {
-      client = await clientRepo.getByClient(basicAuth[0]);
+      const client = await clientRepo.getByClient(basicAuth[0]);
+
+      if (!await client.validateSecret(basicAuth[1])) {
+        throw new UnauthorizedClient('Client id or secret incorrect');
+      }
+
+      return client;
     } catch (e) {
       if (e instanceof NotFound) {
         throw new UnauthorizedClient('Client id or secret incorrect');
@@ -41,12 +44,6 @@ export const getOAuth2ClientFromBasicAuth = (tokenService: TokenServiceInterface
         throw e;
       }
     }
-
-    if (!await tokenService.validateSecret(client, basicAuth[1])) {
-      throw new UnauthorizedClient('Client id or secret incorrect');
-    }
-
-    return client;
   }
 }
 

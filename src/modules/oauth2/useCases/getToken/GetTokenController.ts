@@ -1,78 +1,86 @@
-import {Context} from "@curveball/core";
-import {Controller} from "@curveball/controller";
+import {Context, Middleware} from "@curveball/core";
+import {NotImplemented} from "@curveball/http-errors";
 
 import {OAuth2Client, OAuth2GrantType} from "@modules/oauth2/domain";
 import {OAuth2ClientRepositoryInterface} from "@modules/oauth2/repositories";
-import {TokenServiceInterface} from "@modules/oauth2/commons";
 import {UnsupportedGrantType} from "@modules/oauth2/domain/error";
-import {
-  getOAuth2ClientFromBasicAuth,
-  getOauth2ClientFromBody
-} from "./GetTokenUtillities";
+import {getOAuth2ClientFromBasicAuth, getOauth2ClientFromBody} from "./GetTokenUtillities";
 import {GetTokenServiceInterface} from "./GetTokenService";
 
-export class GetTokenController extends Controller {
-  private static sendCORSHeaders (ctx: Context): void {
-    ctx.response.headers.set('Access-Control-Allow-Origin', '*');
+const sendCORSHeaders = (ctx: Context): void  => {
+  ctx.response.headers.set('Access-Control-Allow-Origin', '*');
+}
+
+export const options = async (ctx: Context): Promise<void> => {
+  sendCORSHeaders(ctx);
+}
+
+export const post = (getTokenService: GetTokenServiceInterface,
+              clientRepository: OAuth2ClientRepositoryInterface) => async (ctx: Context): Promise<void> => {
+  sendCORSHeaders(ctx);
+
+  const grantType = ctx.request.body.grant_type as OAuth2GrantType;
+
+  if (!OAuth2GrantType.includes(grantType)) {
+    throw new UnsupportedGrantType('The "grant_type" must be one of ' + OAuth2GrantType.join(', '));
   }
 
-  constructor(
-    private getTokenService: Promise<GetTokenServiceInterface>,
-    private tokenService: Promise<TokenServiceInterface>,
-    private clientRepository: Promise<OAuth2ClientRepositoryInterface>,
-  ) {
-    super();
+  let oAuth2Client: OAuth2Client;
+
+  switch (grantType) {
+    case "authorization_code":
+      oAuth2Client = await getOauth2ClientFromBody(clientRepository)(ctx);
+      break;
+    case "refresh_token":
+      if (ctx.request.headers.has('Authorization')) {
+        oAuth2Client = await getOAuth2ClientFromBasicAuth(clientRepository)(ctx);
+      } else {
+        oAuth2Client = await getOauth2ClientFromBody(clientRepository)(ctx);
+      }
+      break;
+    default:
+      oAuth2Client = await getOAuth2ClientFromBasicAuth(clientRepository)(ctx);
+      break;
   }
 
-  async post(ctx: Context): Promise<void> {
-    GetTokenController.sendCORSHeaders(ctx);
+  if (!oAuth2Client.allowGrantTypes.includes(grantType)) {
+    throw new UnsupportedGrantType('The current client is not allowed to use the ' + grantType + ' grant_type');
+  }
 
-    const grantType = ctx.request.body.grant_type as OAuth2GrantType;
+  switch (grantType) {
+    case "authorization_code":
+      ctx.response.type = 'application/json';
+      ctx.response.body = await getTokenService.withAuthorizationCode(oAuth2Client, ctx.request.body);
+      break;
+    case "client_credentials":
+      ctx.response.type = 'application/json';
+      ctx.response.body = await getTokenService.withClientCredentials(oAuth2Client);
+      break;
+    case "password":
+      ctx.response.body = await getTokenService.withPassword(oAuth2Client, ctx.request.body);
+      break;
+    case "refresh_token":
+      ctx.response.body = await getTokenService.withRefreshToken(oAuth2Client, ctx.request.body);
+  }
+}
 
-    if (!OAuth2GrantType.includes(grantType)) {
-      throw new UnsupportedGrantType('The "grant_type" must be one of ' + OAuth2GrantType.join(', '));
-    }
+export default function(
+  getTokenService: Promise<GetTokenServiceInterface>,
+  clientRepository: Promise<OAuth2ClientRepositoryInterface>,
+): Middleware {
 
-    let oAuth2Client: OAuth2Client;
+  return async (ctx: Context): Promise<void> => {
+    const method = ctx.request.method.toLowerCase();
 
-    switch (grantType) {
-      case "authorization_code":
-        oAuth2Client = await getOauth2ClientFromBody(await this.clientRepository)(ctx);
-        break;
-      case "refresh_token":
-        if (ctx.request.headers.has('Authorization')) {
-          oAuth2Client = await getOAuth2ClientFromBasicAuth(await this.tokenService, await this.clientRepository)(ctx);
-        } else {
-          oAuth2Client = await getOauth2ClientFromBody(await this.clientRepository)(ctx);
-        }
-        break;
+    switch (method) {
+      case "post":
+        return post(
+          await getTokenService,
+          await clientRepository)(ctx);
+      case "options":
+        return options(ctx);
       default:
-        oAuth2Client = await getOAuth2ClientFromBasicAuth(await this.tokenService, await this.clientRepository)(ctx);
-        break;
+        throw new NotImplemented(method + ' is not implemented');
     }
-
-    if (!oAuth2Client.allowGrantTypes.includes(grantType)) {
-      throw new UnsupportedGrantType('The current client is not allowed to use the ' + grantType + ' grant_type');
-    }
-
-    switch (grantType) {
-      case "authorization_code":
-        ctx.response.type = 'application/json';
-        ctx.response.body = await (await this.getTokenService).withAuthorizationCode(oAuth2Client, ctx.request.body);
-        break;
-      case "client_credentials":
-        ctx.response.type = 'application/json';
-        ctx.response.body = await (await this.getTokenService).withClientCredentials(oAuth2Client);
-        break;
-      case "password":
-        ctx.response.body = await (await this.getTokenService).withPassword(oAuth2Client, ctx.request.body);
-        break;
-      case "refresh_token":
-        ctx.response.body = await (await this.getTokenService).withRefreshToken(oAuth2Client, ctx.request.body);
-    }
-  }
-
-  async options(ctx: Context): Promise<void> {
-    GetTokenController.sendCORSHeaders(ctx);
   }
 }
