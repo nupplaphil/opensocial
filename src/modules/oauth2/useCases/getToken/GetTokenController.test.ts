@@ -193,11 +193,6 @@ describe('GetTokenController', async() => {
       });
 
       it('throws an error without a client_id', async () => {
-        console.log(user);
-        console.log(oAuth2Client);
-        console.log(oAuth2Token);
-        console.log(oAuth2Code);
-
         const request = new MemoryRequest('POST', '');
         request.body = {
           grant_type: 'authorization_code',
