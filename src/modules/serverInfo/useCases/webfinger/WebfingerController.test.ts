@@ -85,5 +85,18 @@ describe('WebfingerController', async() => {
       expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
       expect(context.response.body).to.has.property('links');
     });
+
+    it('returns an user for a valid profile search', async () => {
+      const request = new MemoryRequest('GET', `?resource=@${user.username}`);
+      const context = new BaseContext(request, new MemoryResponse());
+
+      const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+      const webfingerController = WebfingerController(webfingerService);
+
+      await invokeMiddlewares(context, [webfingerController]);
+
+      expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
+      expect(context.response.body).to.has.property('links');
+    });
   });
 });

@@ -23,6 +23,10 @@ export const getOptions = async (ctx: Context): Promise<void> => {
         "href": `${webFingerPath}?resource=${serverUrl}/users/2`,
         "title": "Search for user"
       },
+      "profile": {
+        "href": `${webFingerPath}?@testuser2`,
+        "title": "Search for profile"
+      },
     }
   };
 };
