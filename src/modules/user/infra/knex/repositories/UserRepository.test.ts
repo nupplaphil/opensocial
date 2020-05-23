@@ -39,14 +39,11 @@ describe('UserRepository', () => {
 
   before(async () => {
     data = await knex();
-  })
-
-  beforeEach(async () => {
     await data.migrate.latest();
     await data.seed.run();
-  });
+  })
 
-  afterEach(async () => {
+  after(async () => {
     await data.migrate.rollback();
   });
 
