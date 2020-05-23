@@ -9,6 +9,11 @@ export type Config = {
     port: number,
     protocol: 'http' | 'https' | 'socket',
   },
+  public_server: {
+    host: string,
+    port: number,
+    protocol: 'http' | 'https',
+  }
   db: {
     client: 'sqlite' | 'postgresql' | 'mysql',
     connection: {

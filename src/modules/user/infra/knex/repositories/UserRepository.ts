@@ -65,13 +65,32 @@ export const getUserByUsername = (users: CallType<QueryBuilder<UserRecord>>) => 
   }
 
   const query = users().select().where({
-    username: username
+    usernameLower: username.toLowerCase(),
+    active: 1,
   }).first();
 
   const user = await query as UserRecord;
 
   if (!user) {
     throw new InvalidUser('Invalid username');
+  }
+
+  return await recordToModel(user);
+}
+
+export const getUserByUUID = (users: CallType<QueryBuilder<UserRecord>>) => async (uuid: string): Promise<User> => {
+  if (uuid === null || uuid === undefined) {
+    throw new InvalidUser('Invalid UUID');
+  }
+
+  const query = users().select().where({
+    uuid: uuid,
+  }).first();
+
+  const user = await query as UserRecord;
+
+  if (!user) {
+    throw new InvalidUser('Invlaid UUID');
   }
 
   return await recordToModel(user);
@@ -101,6 +120,7 @@ export const saveUser = (users: CallType<QueryBuilder<UserRecord>>) => async (us
       email: user.email,
       name: user.name,
       username: user.username,
+      usernameLower: user.username.toLowerCase(),
       password: user.password ? user.password.toString() : undefined,
       uuid: user.uuid.toString(),
       type: userTypeToInt(user.type),
@@ -141,6 +161,7 @@ export default async function (knex: PromiseCallType<Knex>): Promise<UserReposit
     getActiveById: getActiveUserById(users),
     getById: getUserById(users),
     getByUsername: getUserByUsername(users),
+    getByUUID: getUserByUUID(users),
     save: saveUser(users),
   }
 }

@@ -19,6 +19,12 @@
       "@core/*" : [
         "core/*"
       ],
+      "@commons" : [
+        "commons"
+      ],
+      "@commons/*" : [
+        "commons/*"
+      ],
       "@modules": [
         "modules"
       ],

@@ -9,7 +9,8 @@ export async function seed(knex: Knex): Promise<void> {
     {
       id: 1,
       name: 'Test User 1',
-      username: 'testuser',
+      username: 'Testuser1',
+      usernameLower: 'testuser1',
       password: 'password1',
       email: 'me@isomr.co',
       uuid: 'f03ede7c-b121-4112-bcc7-130a3487988c',
@@ -19,7 +20,8 @@ export async function seed(knex: Knex): Promise<void> {
     {
       id: 2,
       name: 'Test User 2',
-      username: 'testuser2',
+      username: 'Testuser2',
+      usernameLower: 'testuser2',
       password: 'password2',
       email: 'me@isomr2.co',
       uuid: 'f03ede7c-b121-4112-bcc7-130a3e87988c',

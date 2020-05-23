@@ -43,7 +43,7 @@ const config = convict<Config>({
     port: {
       doc: 'Port the server will listen on',
       format: 'port',
-      default: 8000,
+      default: 8001,
       env: 'PORT',
     },
     protocol: {
@@ -51,6 +51,26 @@ const config = convict<Config>({
       format: ['http', 'https', 'socket'],
       default: 'http',
       env: 'PROTOCOL',
+    },
+  },
+  public_server: {
+    host: {
+      doc: 'Hostname or IP address of the public/web server',
+      format: String,
+      default: '0.0.0.0',
+      env: 'PUBLIC_HOST',
+    },
+    port: {
+      doc: 'Port the public/web server will listen on',
+      format: 'port',
+      default: 8080,
+      env: 'PUBLIC_PORT',
+    },
+    protocol: {
+      doc: 'Protocol used for the public/web server',
+      format: ['http', 'https'],
+      default: 'http',
+      env: 'PUBLIC_PROTOCOL',
     },
   },
   db: {

@@ -14,6 +14,7 @@ const whitelistPath = [
   '/introspect',
   '/validate-bearer',
   '/validate-totp',
+  '/.well-known',
 ];
 
 /**

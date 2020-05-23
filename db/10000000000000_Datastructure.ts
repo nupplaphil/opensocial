@@ -10,6 +10,7 @@ export async function up(knex: Knex): Promise<void> {
     // Data
     usersTable.string('name', 50).notNullable();
     usersTable.string('username', 50).notNullable().unique();
+    usersTable.string('usernameLower', 50).notNullable().unique();
     usersTable.string('password', 60);
     usersTable.string('email', 250).notNullable().unique();
     usersTable.uuid('uuid').notNullable().unique();
