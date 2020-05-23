@@ -63,7 +63,7 @@ describe('UserRepository', () => {
       const user: User = await findUser(2);
 
       equalProps(user, {
-        username: 'testuser2',
+        username: 'Testuser2',
         email: 'me@isomr2.co',
         uuid: new UniqueEntityID('f03ede7c-b121-4112-bcc7-130a3e87988c'),
         name: 'Test User 2',
@@ -76,7 +76,7 @@ describe('UserRepository', () => {
       const user: User = await findUser(1);
 
       equalProps(user, {
-        username: 'testuser',
+        username: 'Testuser1',
         email: 'me@isomr.co',
         uuid: new UniqueEntityID('f03ede7c-b121-4112-bcc7-130a3487988c'),
         name: 'Test User 1',
@@ -111,7 +111,7 @@ describe('UserRepository', () => {
       const user: User = await findActiveUser(2);
 
       equalProps(user, {
-        username: 'testuser2',
+        username: 'Testuser2',
         email: 'me@isomr2.co',
         uuid: new UniqueEntityID('f03ede7c-b121-4112-bcc7-130a3e87988c'),
         name: 'Test User 2',
