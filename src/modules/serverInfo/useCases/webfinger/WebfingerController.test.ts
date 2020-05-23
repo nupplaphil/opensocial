@@ -90,7 +90,7 @@ describe('WebfingerController', async() => {
       });
 
       it('returns an user for a valid profile search', async () => {
-        const request = new MemoryRequest('GET', `?resource=@${user.username}`, {'Accept': jrd});
+        const request = new MemoryRequest('GET', `?resource=${serverUrl.toLowerCase()}/@${user.username}`, {'Accept': jrd});
         const context = new BaseContext(request, new MemoryResponse());
 
         const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
@@ -137,7 +137,7 @@ describe('WebfingerController', async() => {
       });
 
       it('returns an user for a valid profile search', async () => {
-        const request = new MemoryRequest('GET', `?resource=@${user.username}`, {'Accept': xrd});
+        const request = new MemoryRequest('GET', `?resource=${serverUrl.toLowerCase()}/@${user.username}`, {'Accept': xrd});
         const context = new BaseContext(request, new MemoryResponse());
 
         const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
