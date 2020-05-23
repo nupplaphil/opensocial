@@ -1,14 +1,16 @@
 import {BaseContext, invokeMiddlewares, MemoryRequest, MemoryResponse} from "@curveball/core";
 import chai from "chai";
+import chaiXml from "chai-xml";
 import {User, UserPassword} from "@modules/user/domain";
 import {UserRepositoryInterface} from "@modules/user/repositories";
 import WebfingerController from "./WebfingerController";
 import WebfingerService from "./WebfingerService";
 import {UniqueEntityID} from "@core/domain/UniqueEntityID";
 import config from "../../../../config/environment";
-import {serverUrl} from "../../commons/ControllerUtilities";
+import {jrd, serverUrl, xrd} from "../../commons/ControllerUtilities";
 
 const expect = chai.expect;
+chai.use(chaiXml);
 
 const userRepoMock = async(expectedUser: User, expectedId?: number, expectedUuid?: string, expectedUsername?: string): Promise<UserRepositoryInterface> => {
   return {
@@ -60,43 +62,92 @@ describe('WebfingerController', async() => {
       }, 1);
     });
 
-    it('returns an user for a valid account search', async () => {
-      const request = new MemoryRequest('GET', '?resource=acct:Username');
-      const context = new BaseContext(request, new MemoryResponse());
+    describe('using JSON', async () => {
+      it('returns an user for a valid account search', async () => {
+        const request = new MemoryRequest('GET', '?resource=acct:Username', {'Accept': jrd});
+        const context = new BaseContext(request, new MemoryResponse());
 
-      const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
-      const webfingerController = WebfingerController(webfingerService);
+        const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+        const webfingerController = WebfingerController(webfingerService);
 
-      await invokeMiddlewares(context, [webfingerController]);
+        await invokeMiddlewares(context, [webfingerController]);
 
-      expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
-      expect(context.response.body).to.has.property('links');
+        expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
+        expect(context.response.body).to.has.property('links');
+      });
+
+      it('returns an user for a valid user search', async () => {
+        const request = new MemoryRequest('GET', `?resource=${serverUrl}/users/${user.id}`, {'Accept': jrd});
+        const context = new BaseContext(request, new MemoryResponse());
+
+        const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+        const webfingerController = WebfingerController(webfingerService);
+
+        await invokeMiddlewares(context, [webfingerController]);
+
+        expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
+        expect(context.response.body).to.has.property('links');
+      });
+
+      it('returns an user for a valid profile search', async () => {
+        const request = new MemoryRequest('GET', `?resource=@${user.username}`, {'Accept': jrd});
+        const context = new BaseContext(request, new MemoryResponse());
+
+        const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+        const webfingerController = WebfingerController(webfingerService);
+
+        await invokeMiddlewares(context, [webfingerController]);
+
+        expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
+        expect(context.response.body).to.has.property('links');
+      });
     });
 
-    it('returns an user for a valid user search', async () => {
-      const request = new MemoryRequest('GET', `?resource=${serverUrl}/users/${user.id}`);
-      const context = new BaseContext(request, new MemoryResponse());
+    describe('using XRD', async () => {
+      let expectedXRD: string;
 
-      const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
-      const webfingerController = WebfingerController(webfingerService);
+      before(async () => {
+        expectedXRD = `<?xml version="1.0" encoding="UTF-8"?><XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0"><Subject>acct:${user.username}@${config.get('server').host}</Subject><Link rel="self" type="application/activity+json" href="${serverUrl}/users/${user.id}"/><Link rel="http://webfinger.net/rel/profile-page" type="text/html" href="${serverUrl}/@${user.username}"/><Link rel="http://ostatus.org/schema/1.0/subscribe" template="${serverUrl}/authorize-follow?acct={uri}"/></XRD>`
+      });
 
-      await invokeMiddlewares(context, [webfingerController]);
+      it('returns an user for a valid account search', async () => {
+        const request = new MemoryRequest('GET', '?resource=acct:Username', {'Accept': xrd});
+        const context = new BaseContext(request, new MemoryResponse());
 
-      expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
-      expect(context.response.body).to.has.property('links');
-    });
+        const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+        const webfingerController = WebfingerController(webfingerService);
 
-    it('returns an user for a valid profile search', async () => {
-      const request = new MemoryRequest('GET', `?resource=@${user.username}`);
-      const context = new BaseContext(request, new MemoryResponse());
+        await invokeMiddlewares(context, [webfingerController]);
 
-      const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
-      const webfingerController = WebfingerController(webfingerService);
+        expect(context.response.body).xml.to.be.valid();
+        expect(context.response.body).xml.to.be.eq(expectedXRD);
+      });
 
-      await invokeMiddlewares(context, [webfingerController]);
+      it('returns an user for a valid user search', async () => {
+        const request = new MemoryRequest('GET', `?resource=${serverUrl}/users/${user.id}`, {'Accept': xrd});
+        const context = new BaseContext(request, new MemoryResponse());
 
-      expect(context.response.body).to.has.property('subject', `acct:${user.username}@${config.get('server').host}`);
-      expect(context.response.body).to.has.property('links');
+        const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+        const webfingerController = WebfingerController(webfingerService);
+
+        await invokeMiddlewares(context, [webfingerController]);
+
+        expect(context.response.body).xml.to.be.valid();
+        expect(context.response.body).xml.to.be.eq(expectedXRD);
+      });
+
+      it('returns an user for a valid profile search', async () => {
+        const request = new MemoryRequest('GET', `?resource=@${user.username}`, {'Accept': xrd});
+        const context = new BaseContext(request, new MemoryResponse());
+
+        const webfingerService = WebfingerService(userRepoMock(user, 1, '12345', user.username.toLowerCase()));
+        const webfingerController = WebfingerController(webfingerService);
+
+        await invokeMiddlewares(context, [webfingerController]);
+
+        expect(context.response.body).xml.to.be.valid();
+        expect(context.response.body).xml.to.be.eq(expectedXRD);
+      });
     });
   });
 });
