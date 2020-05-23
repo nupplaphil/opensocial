@@ -4,10 +4,12 @@ import {getActiveUserById, getUserById, saveUser} from './UserRepository';
 import {QueryBuilder} from "knex";
 import {User, UserProps} from "../../../domain";
 import chaiDatetime from "chai-datetime";
-import {UniqueEntityID} from "../../../../../core/domain/UniqueEntityID";
+import chaiAsPromised from "chai-as-promised";
+import {UniqueEntityID} from "@core/domain/UniqueEntityID";
 import Knex = require("knex");
 
 chai.use(chaiDatetime);
+chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 const equalUser = (user: User, expectUser: User, id?: number): void => {
@@ -34,20 +36,20 @@ const equalProps = (user: User, expectProps: UserProps, id?: number): void => {
   expect(user.type).to.be.eq(expectProps.type);
 }
 
-describe('UserRepository', () => {
+describe('UserRepository', async () => {
   let data: Knex;
 
-  before(async () => {
+  beforeEach(async () => {
     data = await knex();
     await data.migrate.latest();
     await data.seed.run();
   })
 
-  after(async () => {
+  afterEach(async () => {
     await data.migrate.rollback();
   });
 
-  describe('Function "getUser"', () => {
+  describe('Function "getUser"', async () => {
     let findUser: Function;
 
     beforeEach(async () => {
