@@ -36,7 +36,7 @@ const equalProps = (user: User, expectProps: UserProps, id?: number): void => {
   expect(user.type).to.be.eq(expectProps.type);
 }
 
-describe('UserRepository', async () => {
+describe('UserRepository', () => {
   let data: Knex;
 
   beforeEach(async () => {
@@ -49,7 +49,7 @@ describe('UserRepository', async () => {
     await data.migrate.rollback();
   });
 
-  describe('Function "getUser"', async () => {
+  describe('Function "getUser"', () => {
     let findUser: Function;
 
     beforeEach(async () => {
@@ -97,7 +97,7 @@ describe('UserRepository', async () => {
     });
   });
 
-  describe('Function "getActiveUser"', async () => {
+  describe('Function "getActiveUser"', () => {
     let findActiveUser: Function;
 
     beforeEach(async () => {
@@ -126,7 +126,7 @@ describe('UserRepository', async () => {
     });
   });
 
-  describe('Function "saveUser"', async () => {
+  describe('Function "saveUser"', () => {
     let insert: Function;
     let findById: Function;
 
@@ -174,7 +174,7 @@ describe('UserRepository', async () => {
     });
   });
 
-  describe('Function "UpdateUser"', async () => {
+  describe('Function "UpdateUser"', () => {
     let update: Function;
     let findById: Function;
 
