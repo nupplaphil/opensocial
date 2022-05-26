@@ -139,7 +139,7 @@
     "axios": "^0.21.1",
     "bcrypt": "5.0.0",
     "chalk": "4.0.0",
-    "convict": "6.0.0",
+    "convict": "6.2.3",
     "deepmerge": "3.0.0",
     "hal-browser": "0.8.6",
     "knex": "^0.20.13",
