@@ -142,7 +142,7 @@
     "convict": "6.0.0",
     "deepmerge": "3.0.0",
     "hal-browser": "0.8.6",
-    "knex": "^0.20.13",
+    "knex": "^2.4.0",
     "knex-stringcase": "1.4.1",
     "otplib": "12.0.1",
     "shallow-equal-object": "1.1.1",
